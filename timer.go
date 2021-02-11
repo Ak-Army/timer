@@ -33,6 +33,7 @@ func (t namedTimer) SafeStop() {
 	t.Timer.Stop()
 	select {
 	case <-t.Timer.C:
+	default:
 	}
 }
 
