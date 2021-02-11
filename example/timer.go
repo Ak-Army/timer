@@ -16,9 +16,9 @@ func (t *timerExample) timerExample() {
 	t1 := timer.NewTimer("timerExample1", time.Second)
 	t2 := timer.NewTimer("timerExample2", 3*time.Second)
 	t3 := timer.NewTimer("timerExample3", 5*time.Second)
-	defer t1.Stop()
-	defer t2.Stop()
-	defer t3.Stop()
+	defer t1.SafeStop()
+	defer t2.SafeStop()
+	defer t3.SafeStop()
 	for {
 		select {
 		case <-t1.C():

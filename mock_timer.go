@@ -85,6 +85,13 @@ func (mt *mockedTimer) Stop() bool {
 	return true
 }
 
+func (mt *mockedTimer) SafeStop() {
+	mt.Stop()
+}
+
+func (mt *mockedTimer) SafeReset(d time.Duration) {
+	mt.Reset(d)
+}
 func (mt *mockedTimer) Tick() {
 	mt.c <- time.Now()
 }
