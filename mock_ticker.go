@@ -72,9 +72,7 @@ func (mt mockTicker) C() <-chan time.Time {
 	return mt.c
 }
 
-func (mt *mockTicker) Stop() {
-	close(mt.stopChan)
-}
+func (mt *mockTicker) Stop() {}
 
 func (mt *mockTicker) Tick() {
 	mt.c <- time.Now()

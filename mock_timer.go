@@ -80,8 +80,6 @@ func (mt *mockedTimer) Reset(d time.Duration) bool {
 }
 
 func (mt *mockedTimer) Stop() bool {
-	close(mt.resetChan)
-	close(mt.stopChan)
 	return true
 }
 
