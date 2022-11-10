@@ -33,7 +33,7 @@ func TestTimer(t *testing.T) {
 	if te.tick2 != 2 {
 		t.Error("tick2 is wrong")
 	}
-	timerExample3.TickAndWaitForReset()
+	timerExample3.TickAndWaitForStop()
 	if te.tick1 != 1 {
 		t.Error("tick1 is wrong")
 	}

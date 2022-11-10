@@ -80,6 +80,7 @@ func (mt *mockedTimer) Reset(d time.Duration) bool {
 }
 
 func (mt *mockedTimer) Stop() bool {
+	mt.stopChan <- struct{}{}
 	return true
 }
 

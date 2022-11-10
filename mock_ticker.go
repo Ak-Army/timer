@@ -72,7 +72,9 @@ func (mt mockTicker) C() <-chan time.Time {
 	return mt.c
 }
 
-func (mt *mockTicker) Stop() {}
+func (mt *mockTicker) Stop() {
+	mt.stopChan <- struct{}{}
+}
 
 func (mt *mockTicker) Tick() {
 	mt.c <- time.Now()
