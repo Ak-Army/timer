@@ -9,7 +9,7 @@ import (
 )
 
 type MockedTimers struct {
-	sync.Mutex
+	mu         sync.Mutex
 	timers     map[string]Timer
 	timerPatch *monkey.PatchGuard
 }
@@ -19,8 +19,8 @@ func NewMockedTimer() *MockedTimers {
 		timers: make(map[string]Timer),
 	}
 	m.timerPatch = monkey.Patch(NewTimer, func(name string, d time.Duration) Timer {
-		m.Lock()
-		defer m.Unlock()
+		m.mu.Lock()
+		defer m.mu.Unlock()
 		if _, ok := m.timers[name]; !ok {
 			m.timers[name] = newMockTimer(name, d)
 		}
@@ -31,20 +31,20 @@ func NewMockedTimer() *MockedTimers {
 }
 
 func (m *MockedTimers) Reset() {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.timers = make(map[string]Timer)
 }
 
 func (m *MockedTimers) GetTimer(name string) *mockedTimer {
 	for {
-		m.Lock()
+		m.mu.Lock()
 		if t, ok := m.timers[name]; ok {
-			m.Unlock()
+			m.mu.Unlock()
 			runtime.Gosched()
 			return t.(*mockedTimer)
 		}
-		m.Unlock()
+		m.mu.Unlock()
 		runtime.Gosched()
 		time.Sleep(1 * time.Millisecond)
 	}
@@ -70,7 +70,7 @@ type mockedTimer struct {
 	stopChan  chan struct{}
 }
 
-func (mt mockedTimer) C() <-chan time.Time {
+func (mt *mockedTimer) C() <-chan time.Time {
 	return mt.c
 }
 

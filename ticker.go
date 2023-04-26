@@ -20,7 +20,7 @@ func NewTicker(name string, d time.Duration) Ticker {
 	}
 }
 
-func (t namedTicker) C() <-chan time.Time {
+func (t *namedTicker) C() <-chan time.Time {
 	return t.Ticker.C
 }
 

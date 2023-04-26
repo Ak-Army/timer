@@ -9,7 +9,7 @@ import (
 )
 
 type MockedTickers struct {
-	sync.Mutex
+	mu         sync.Mutex
 	tickers    map[string]Ticker
 	timerPatch *monkey.PatchGuard
 }
@@ -19,8 +19,8 @@ func NewMockedTickers() *MockedTickers {
 		tickers: make(map[string]Ticker),
 	}
 	m.timerPatch = monkey.Patch(NewTicker, func(name string, d time.Duration) Ticker {
-		m.Lock()
-		defer m.Unlock()
+		m.mu.Lock()
+		defer m.mu.Unlock()
 		if _, ok := m.tickers[name]; !ok {
 			m.tickers[name] = newMockTicker(name, d)
 		}
@@ -31,20 +31,20 @@ func NewMockedTickers() *MockedTickers {
 }
 
 func (m *MockedTickers) Reset() {
-	m.Lock()
-	defer m.Unlock()
+	m.mu.Lock()
+	defer m.mu.Unlock()
 	m.tickers = make(map[string]Ticker)
 }
 
 func (m *MockedTickers) GetTicker(name string) *mockTicker {
 	for {
-		m.Lock()
+		m.mu.Lock()
 		if t, ok := m.tickers[name]; ok {
-			m.Unlock()
+			m.mu.Unlock()
 			runtime.Gosched()
 			return t.(*mockTicker)
 		}
-		m.Unlock()
+		m.mu.Unlock()
 		runtime.Gosched()
 		time.Sleep(1 * time.Millisecond)
 	}
@@ -68,7 +68,7 @@ type mockTicker struct {
 	stopChan chan struct{}
 }
 
-func (mt mockTicker) C() <-chan time.Time {
+func (mt *mockTicker) C() <-chan time.Time {
 	return mt.c
 }
 

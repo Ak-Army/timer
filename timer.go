@@ -25,11 +25,11 @@ func NewTimer(name string, d time.Duration) Timer {
 	}
 }
 
-func (t namedTimer) C() <-chan time.Time {
+func (t *namedTimer) C() <-chan time.Time {
 	return t.Timer.C
 }
 
-func (t namedTimer) SafeStop() {
+func (t *namedTimer) SafeStop() {
 	t.Timer.Stop()
 	select {
 	case <-t.Timer.C:
@@ -37,11 +37,59 @@ func (t namedTimer) SafeStop() {
 	}
 }
 
-func (t namedTimer) SafeReset(d time.Duration) {
+func (t *namedTimer) SafeReset(d time.Duration) {
 	t.SafeStop()
 	t.Timer.Reset(d)
 }
 
 func After(name string, d time.Duration) <-chan time.Time {
 	return NewTimer(name, d).C()
+}
+
+type afterFuncTimer struct {
+	*namedTimer
+	fn     func()
+	stopCh chan struct{}
+	done   chan struct{}
+}
+
+func (t *afterFuncTimer) SafeStop() {
+	select {
+	case <-t.stopCh:
+		return
+	default:
+	}
+	close(t.stopCh)
+	<-t.done
+	t.namedTimer.SafeStop()
+}
+
+func (t *afterFuncTimer) SafeReset(d time.Duration) {
+	t.SafeStop()
+	t.Timer.Reset(d)
+	t.start()
+}
+
+func (t *afterFuncTimer) start() {
+	t.stopCh = make(chan struct{})
+	t.done = make(chan struct{})
+	go func() {
+		select {
+		case <-t.C():
+			close(t.stopCh)
+			t.fn()
+		case <-t.stopCh:
+		}
+		close(t.done)
+	}()
+}
+
+func AfterFunc(name string, d time.Duration, fn func()) Timer {
+	timer := &afterFuncTimer{
+		namedTimer: NewTimer(name, d).(*namedTimer),
+		fn:         fn,
+	}
+	timer.start()
+
+	return timer
 }
