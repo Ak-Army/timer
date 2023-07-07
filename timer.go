@@ -47,7 +47,7 @@ func After(name string, d time.Duration) <-chan time.Time {
 }
 
 type afterFuncTimer struct {
-	*namedTimer
+	Timer
 	fn     func()
 	stopCh chan struct{}
 	done   chan struct{}
@@ -61,7 +61,7 @@ func (t *afterFuncTimer) SafeStop() {
 	}
 	close(t.stopCh)
 	<-t.done
-	t.namedTimer.SafeStop()
+	t.Timer.SafeStop()
 }
 
 func (t *afterFuncTimer) SafeReset(d time.Duration) {
@@ -86,8 +86,8 @@ func (t *afterFuncTimer) start() {
 
 func AfterFunc(name string, d time.Duration, fn func()) Timer {
 	timer := &afterFuncTimer{
-		namedTimer: NewTimer(name, d).(*namedTimer),
-		fn:         fn,
+		Timer: NewTimer(name, d).(*namedTimer),
+		fn:    fn,
 	}
 	timer.start()
 

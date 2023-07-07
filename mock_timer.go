@@ -105,7 +105,7 @@ func (mt *mockedTimer) TickAndWaitForStop() {
 	mt.WaitForStop()
 }
 
-func (mt *mockedTimer) TickAndForResetMultiple(i int) {
+func (mt *mockedTimer) TickAndWaitForResetMultiple(i int) {
 	for ; i > 0; i-- {
 		mt.TickAndWaitForReset()
 	}
