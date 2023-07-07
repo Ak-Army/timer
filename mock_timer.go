@@ -59,7 +59,7 @@ func newMockTimer(name string, _ time.Duration) Timer {
 		name:      name,
 		c:         make(chan time.Time),
 		resetChan: make(chan time.Duration),
-		stopChan:  make(chan struct{}),
+		stopChan:  make(chan struct{}, 1),
 	}
 }
 
@@ -80,7 +80,10 @@ func (mt *mockedTimer) Reset(d time.Duration) bool {
 }
 
 func (mt *mockedTimer) Stop() bool {
-	mt.stopChan <- struct{}{}
+	select {
+	case mt.stopChan <- struct{}{}:
+	default:
+	}
 	return true
 }
 
