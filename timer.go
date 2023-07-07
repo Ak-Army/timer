@@ -86,7 +86,7 @@ func (t *afterFuncTimer) start() {
 
 func AfterFunc(name string, d time.Duration, fn func()) Timer {
 	timer := &afterFuncTimer{
-		Timer: NewTimer(name, d).(*namedTimer),
+		Timer: NewTimer(name, d),
 		fn:    fn,
 	}
 	timer.start()
